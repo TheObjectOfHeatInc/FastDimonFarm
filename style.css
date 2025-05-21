@@ -19,24 +19,40 @@ h1 {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    width: fit-content;
 }
 
-.info-panel {
+.top-panel {
+    display: flex;
+    justify-content: space-between;
     width: 100%;
-    text-align: right;
     margin-bottom: 15px;
+    align-items: center;
     font-size: 1.2em;
     color: #333;
 }
 
+.top-panel button {
+    padding: 10px 15px;
+    background-color: #6a8e23;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s;
+    margin-left: 10px;
+}
+.top-panel button:hover {
+    background-color: #5aa13c;
+}
+
 .farm-grid {
     display: grid;
-    grid-template-columns: repeat(3, 100px); /* 3 колонки по 100px */
-    grid-template-rows: repeat(3, 100px); /* 3 ряда по 100px */
-    gap: 5px; /* Промежутки между ячейками */
-    border: 2px solid #6b8e23; /* Цвет границы фермы */
+    gap: 5px;
+    border: 2px solid #6b8e23;
     padding: 5px;
-    background-color: #8bc34a; /* Фон под сеткой */
+    background-color: #8bc34a;
 }
 
 .cell {
@@ -52,110 +68,203 @@ h1 {
     font-size: 0.8em;
     color: white;
     text-align: center;
-    position: relative; /* Для позиционирования таймера */
+    position: relative;
     transition: background-color 0.2s ease;
+    overflow: hidden;
 }
 
-.cell.seed {
-    background-color: #7b4e2d; /* Темнее для семян */
+/* Состояния ячеек */
+.cell.locked {
+    background-color: #5a3219;
+    color: #ccc;
+    font-weight: bold;
+}
+.cell.locked::after {
+    content: 'Купить'; /* Изменил текст */
+    display: block;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
 }
 
-.cell.growing {
-    background-color: #6a964a; /* Более зеленый для роста */
+.cell.empty { background-color: #a0522d; }
+.cell.clutter-trash { background-color: #708090; }
+.cell.clutter-bushes { background-color: #6b8e23; }
+.cell.clutter-puddle { background-color: #87cefa; }
+.cell.preparing { background-color: #b0c4de; }
+.cell.planted { background-color: #8ac064; }
+.cell.mature { background-color: #609d44; }
+.cell.producing { background-color: #7bbd5e; }
+.cell.product_full { background-color: #e09950; }
+
+/* Спрайты теперь будут отдельным div внутри ячейки */
+.cell .sprite {
+    position: absolute;
+    bottom: 5px; /* Общая позиция для всех спрайтов */
+    left: 50%;
+    transform: translateX(-50%);
+    display: block;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    z-index: 1; /* Чтобы спрайты были под таймером/прогресс-баром, но над фоном */
 }
 
-.cell.mature {
-    background-color: #5aa13c; /* Насыщенный зеленый для зрелых */
+/* Спрайты для захламления */
+.clutter-trash .sprite {
+    width: 40px;
+    height: 40px;
+    background-color: #4a4a4a;
+    border-radius: 5px;
+    top: 30px;
+}
+.clutter-bushes .sprite {
+    width: 60px;
+    height: 60px;
+    background-color: #4d8029;
+    border-radius: 50% 50% 10px 10px;
+    top: 20px;
+}
+.clutter-puddle .sprite {
+    width: 70px;
+    height: 30px;
+    background-color: #4682b4;
+    border-radius: 50%;
+    top: 50px;
 }
 
-/* Лоуполи спрайты (просто меняем цвет или добавляем простой элемент) */
-.cell::after {
+/* Спрайты для растений и построек */
+.apple_sapling .sprite {
+    width: 60px;
+    height: 70px;
+    background-color: #7b4a20; /* Ствол */
+    border-radius: 5px 5px 0 0;
+    top: 20px;
+    /* Дополнительные элементы для кроны будут в другом псевдоэлементе или отдельном спрайте */
+}
+.apple_sapling .sprite::before { /* Крона */
     content: '';
     position: absolute;
-    bottom: 5px;
-    /* Здесь можно добавить простые формы для спрайтов */
+    top: -40px; /* Относительно спрайта */
+    left: -10px;
+    width: 80px;
+    height: 50px;
+    background-color: #4CAF50; /* Зеленая крона */
+    border-radius: 50%;
+    z-index: 2; /* Чтобы быть поверх ствола */
+}
+/* Добавим яблоки на крону */
+.mature.apple_sapling .sprite::before,
+.producing.apple_sapling .sprite::before,
+.product_full.apple_sapling .sprite::before {
+    box-shadow: 15px 15px 0 0px #e53935, -10px 10px 0 0px #e53935; /* Красные точки-яблоки */
+}
+.product_full.apple_sapling .sprite::before { /* Много яблок, производство остановлено */
+    box-shadow: 15px 15px 0 0px #e53935, -10px 10px 0 0px #e53935, 5px -10px 0 0px #e53935;
 }
 
-.cell.seed::after {
-    width: 10px;
-    height: 10px;
-    background-color: #fff;
-    border-radius: 50%; /* Простая точка */
-}
 
-.cell.carrot.growing::after {
-    width: 20px;
-    height: 30px;
-    background-color: #70ad47; /* Зеленая ботва */
-    border-radius: 5px 5px 0 0;
-}
-
-.cell.carrot.mature::after {
-    width: 25px;
-    height: 35px;
-    background-color: #ed8b2e; /* Оранжевая морковь */
-    border-radius: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.cell.wheat.growing::after {
+.wheat_seed .sprite { /* Пшеница - росток */
     width: 15px;
     height: 25px;
-    background-color: #b7b752; /* Желтоватая пшеница */
+    background-color: #a0a040;
     border-radius: 3px;
+    top: 60px;
+}
+.planted.wheat_seed .sprite { /* Пшеница - растет */
+    height: 40px;
+}
+.mature.wheat_seed .sprite { /* Пшеница - зрелая */
+    height: 50px;
+    background-color: #e6b200; /* Золотистая */
 }
 
-.cell.wheat.mature::after {
-    width: 20px;
-    height: 30px;
-    background-color: #e6b200; /* Золотистая пшеница */
-    border-radius: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.cell.tomato.growing::after {
+.potato_seed .sprite { /* Картошка - росток */
     width: 20px;
     height: 20px;
-    background-color: #55a044; /* Зеленые листья томата */
+    background-color: #808030;
     border-radius: 50%;
+    top: 60px;
+}
+.planted.potato_seed .sprite { /* Картошка - растет */
+    height: 35px;
+    border-radius: 5px;
+}
+.mature.potato_seed .sprite { /* Картошка - зрелая */
+    height: 45px;
+    background-color: #e0b060; /* Коричневатая */
 }
 
-.cell.tomato.mature::after {
-    width: 25px;
-    height: 25px;
-    background-color: #e53935; /* Красный томат */
-    border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
+.cow_pen .sprite { /* Коровник */
+    width: 80px;
+    height: 60px;
+    background-color: #a08060; /* Коричневое здание */
+    border-radius: 5px;
+    top: 30px;
+}
+.sheep_pen .sprite { /* Загон для овец */
+    width: 70px;
+    height: 50px;
+    background-color: #c0c0c0; /* Светлое дерево */
+    border-radius: 5px;
+    border: 2px solid #808080;
+    top: 40px;
 }
 
 
+/* Прогресс-бар и таймер - теперь выше спрайтов */
 .timer {
     position: absolute;
     top: 5px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7); /* Более темный фон */
     color: white;
     padding: 2px 5px;
     border-radius: 3px;
     font-size: 0.7em;
+    white-space: nowrap;
+    z-index: 10; /* Установил высокий z-index */
 }
 
+.progress-bar-container {
+    width: 90%;
+    height: 10px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    margin-top: 5px;
+    overflow: hidden;
+    position: absolute;
+    bottom: 5px;
+    left: 5%;
+    z-index: 10; /* Установил высокий z-index */
+}
 
-/* Модальное окно */
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: #4CAF50;
+    border-radius: 5px;
+}
+
+/* Модальное окно - без изменений */
 .modal {
-    display: none; /* Скрыто по умолчанию */
-    position: fixed; /* Поверх всего */
-    z-index: 1; /* На переднем плане */
+    display: none;
+    position: fixed;
+    z-index: 1000; /* Самый высокий, чтобы быть поверх всего */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto; /* Если контента много, можно прокручивать */
-    background-color: rgba(0, 0, 0, 0.4); /* Полупрозрачный фон */
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
     justify-content: center;
     align-items: center;
 }
@@ -165,8 +274,8 @@ h1 {
     margin: auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 80%; /* Ширина модального окна */
-    max-width: 300px;
+    width: 80%;
+    max-width: 400px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     position: relative;
@@ -187,12 +296,76 @@ h1 {
     text-decoration: none;
 }
 
-.modal-options button {
-    display: block;
-    width: 80%;
+.tab-buttons {
+    display: flex;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+}
+.tab-buttons button {
+    flex: 1;
     padding: 10px;
-    margin: 10px auto;
-    background-color: #4CAF50;
+    border: 1px solid #ccc;
+    background-color: #eee;
+    cursor: pointer;
+    border-bottom: none;
+    font-size: 0.9em;
+    border-radius: 5px 5px 0 0;
+    transition: background-color 0.2s;
+}
+.tab-buttons button.active {
+    background-color: #fefefe;
+    border-bottom: 1px solid #fefefe;
+    z-index: 1;
+}
+.tab-buttons button:hover:not(.active) {
+    background-color: #e0e0e0;
+}
+
+.tab-content {
+    border: 1px solid #ccc;
+    padding: 10px;
+    min-height: 150px;
+    max-height: 300px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+}
+.item-row:last-child {
+    border-bottom: none;
+}
+.item-row span {
+    flex-grow: 1;
+    padding-right: 10px;
+}
+.item-row button {
+    padding: 5px 10px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+.item-row button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.modal-action-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+}
+.modal-action-buttons button {
+    padding: 10px 15px;
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
@@ -200,7 +373,12 @@ h1 {
     font-size: 1em;
     transition: background-color 0.2s;
 }
-
-.modal-options button:hover {
-    background-color: #45a049;
+.modal-action-buttons button:hover {
+    background-color: #0056b3;
+}
+.modal-action-buttons button.cancel {
+    background-color: #dc3545;
+}
+.modal-action-buttons button.cancel:hover {
+    background-color: #c82333;
 }
