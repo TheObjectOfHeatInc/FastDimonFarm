@@ -1,0 +1,206 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f0f8f0; /* Светло-зеленый фон */
+    margin: 20px;
+}
+
+h1 {
+    color: #4a6a4a;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.info-panel {
+    width: 100%;
+    text-align: right;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.farm-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 100px); /* 3 колонки по 100px */
+    grid-template-rows: repeat(3, 100px); /* 3 ряда по 100px */
+    gap: 5px; /* Промежутки между ячейками */
+    border: 2px solid #6b8e23; /* Цвет границы фермы */
+    padding: 5px;
+    background-color: #8bc34a; /* Фон под сеткой */
+}
+
+.cell {
+    width: 100px;
+    height: 100px;
+    background-color: #a0522d; /* Цвет пустой грядки (земля) */
+    border: 1px solid #7a4225;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.8em;
+    color: white;
+    text-align: center;
+    position: relative; /* Для позиционирования таймера */
+    transition: background-color 0.2s ease;
+}
+
+.cell.seed {
+    background-color: #7b4e2d; /* Темнее для семян */
+}
+
+.cell.growing {
+    background-color: #6a964a; /* Более зеленый для роста */
+}
+
+.cell.mature {
+    background-color: #5aa13c; /* Насыщенный зеленый для зрелых */
+}
+
+/* Лоуполи спрайты (просто меняем цвет или добавляем простой элемент) */
+.cell::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    /* Здесь можно добавить простые формы для спрайтов */
+}
+
+.cell.seed::after {
+    width: 10px;
+    height: 10px;
+    background-color: #fff;
+    border-radius: 50%; /* Простая точка */
+}
+
+.cell.carrot.growing::after {
+    width: 20px;
+    height: 30px;
+    background-color: #70ad47; /* Зеленая ботва */
+    border-radius: 5px 5px 0 0;
+}
+
+.cell.carrot.mature::after {
+    width: 25px;
+    height: 35px;
+    background-color: #ed8b2e; /* Оранжевая морковь */
+    border-radius: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.cell.wheat.growing::after {
+    width: 15px;
+    height: 25px;
+    background-color: #b7b752; /* Желтоватая пшеница */
+    border-radius: 3px;
+}
+
+.cell.wheat.mature::after {
+    width: 20px;
+    height: 30px;
+    background-color: #e6b200; /* Золотистая пшеница */
+    border-radius: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.cell.tomato.growing::after {
+    width: 20px;
+    height: 20px;
+    background-color: #55a044; /* Зеленые листья томата */
+    border-radius: 50%;
+}
+
+.cell.tomato.mature::after {
+    width: 25px;
+    height: 25px;
+    background-color: #e53935; /* Красный томат */
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+
+.timer {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.7em;
+}
+
+
+/* Модальное окно */
+.modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed; /* Поверх всего */
+    z-index: 1; /* На переднем плане */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Если контента много, можно прокручивать */
+    background-color: rgba(0, 0, 0, 0.4); /* Полупрозрачный фон */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Ширина модального окна */
+    max-width: 300px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    text-align: center;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.modal-options button {
+    display: block;
+    width: 80%;
+    padding: 10px;
+    margin: 10px auto;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s;
+}
+
+.modal-options button:hover {
+    background-color: #45a049;
+}
